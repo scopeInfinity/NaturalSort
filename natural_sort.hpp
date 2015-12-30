@@ -7,13 +7,13 @@
 Calling Methods :
 
 	//For Natural Sorting
-	void SI::natural_sort(Container<String>);
-	void SI::natural_sort(IteratorBegin<String>,IteratorEnd<String>);
-	void SI::natural_sort<String,CArraySize>(CArray<String>);
+	void SI::natural::sort(Container<String>);
+	void SI::natural::sort(IteratorBegin<String>,IteratorEnd<String>);
+	void SI::natural::sort<String,CArraySize>(CArray<String>);
 
 	//For Natural Comparision
-	bool SI::natural_comp<String>(String lhs,String rhs);
-	bool SI::natural_comp<String>(char *const lhs,char *const rhs);
+	bool SI::natural::compare<String>(String lhs,String rhs);
+	bool SI::natural::compare<String>(char *const lhs,char *const rhs);
 
 	Here we can have
 		std::vector<std::string> 	as Container<String>
@@ -21,8 +21,8 @@ Calling Methods :
 		CArray<String>				as std::string[CArraySize]
 
 ***********************************************************************/
-#ifndef SI_NATURAL_SORT_HPP
-#define SI_NATURAL_SORT_HPP
+#ifndef SI_sort_HPP
+#define SI_sort_HPP
 #include <cctype>
 #include <algorithm>
 #include <vector>
@@ -30,105 +30,127 @@ Calling Methods :
 
 namespace SI
 {
-	/********** Compare Two Character CaseInsensitive ********/
-	template<typename T>
-	bool natural_comp_element(const T &lhs,const T &rhs)
+namespace natural
+{
+	namespace detail
 	{
-		if(tolower(lhs)<tolower(rhs))
-			return true;
-		return false;
-	}
-
-	/****************************************************
-	Comparing two SubString from (Begin,End Iterator each)
-	with only digits.
-	Usage :
-		int natural_comp_num()(\
-		FirstNumberBeginIterator,FirstNumberEndIterator,isFirstNumberFractionalPart\
-		SecondNumberBeginIterator,SecondNumberEndIterator,isSecondNumberFractionalPart\
-		);
-
-	Returns : 
-		-1  - Number1  <   Number2
-		 0  - Number1  ==  Number2
-		 1  - Number1  >   Number2
-
-	***************************************************/
-
-	template<typename Iterator>
-	struct natural_comp_number
-	{
-	private:
-		int fractional(Iterator first1,Iterator end1, Iterator first2,Iterator end2)
+		/********** Compare Two Character CaseInsensitive ********/
+		template<typename ElementType>
+		bool natural_less(const ElementType &lhs,const ElementType &rhs)
 		{
-			while(first1<end1 && first2<end2)
+			if(tolower(lhs)<tolower(rhs))
+				return true;
+			return false;
+		}
+
+		template<typename ElementType>
+		bool is_not_digit(const ElementType &x)
+		{
+			return !isdigit(x);
+		}
+
+		/********** Compare Two Iterators CaseInsensitive ********/
+		template<typename ElementType,typename Iterator>
+		struct comp_over_iterator
+		{
+			int operator()(const Iterator &lhs,const Iterator &rhs) const
 			{
-				if(*first1<*first2)
+				if(natural_less<ElementType>(*lhs,*rhs))
 					return -1;
-				if(*first1>*first2)
+				if(natural_less<ElementType>(*rhs,*lhs))
 					return +1;
-				first1++;
-				first2++;
 			}
-			while(first1<end1 && *first1=='0') first1++;
-			while(first2<end2 && *first2=='0') first1++;
-			if(first1==end1 && first2!=end2)
-				return -1;
-			else if(first1!=end1 && first2==end2)
-				return +1;
-			else //first1==end1 && first2==end2
-				return 0;		
-		}
-		int non_fractional(Iterator first1,Iterator end1, Iterator first2,Iterator end2)
-		{
-			//Skip Inital Zero's
-			while(first1<end1 && *first1=='0') first1++;
-			while(first2<end2 && *first2=='0') first2++; \
+		};
 	
-			//Comparing By Length of Both String
-			if(end1-first1<end2-first2)
-				return -1;
-			if(end1-first1>end2-first2)
-				return +1;
+		/****************************************************
+		Comparing two SubString from (Begin,End Iterator each)
+		with only digits.
+		Usage :
+			int compare_number()(\
+			FirstNumberBeginIterator,FirstNumberEndIterator,isFirstNumberFractionalPart\
+			SecondNumberBeginIterator,SecondNumberEndIterator,isSecondNumberFractionalPart\
+			);
 
-			//Equal In length
-			while(first1<end1)
+		Returns : 
+			-1  - Number1  <   Number2
+			 0  - Number1  ==  Number2
+			 1  - Number1  >   Number2
+
+		***************************************************/
+
+
+		template<typename ValueType, typename Iterator>
+		struct compare_number
+		{
+		private:
+			//If Number is Itself fractional Part
+			int fractional(Iterator lhsBegin,Iterator lhsEnd, Iterator rhsBegin,Iterator rhsEnd)
 			{
-				if(*first1<*first2)
+				while(lhsBegin<lhsEnd && rhsBegin<rhsEnd)
+				{
+					int local_compare = comp_over_iterator<ValueType, Iterator>()(lhsBegin,rhsBegin);
+					if(local_compare!=0)
+						return local_compare;
+					lhsBegin++;
+					rhsBegin++;
+				}
+				while(lhsBegin<lhsEnd && *lhsBegin=='0') lhsBegin++;
+				while(rhsBegin<rhsEnd && *rhsBegin=='0') rhsBegin++;
+				if(lhsBegin==lhsEnd && rhsBegin!=rhsEnd)
 					return -1;
-				if(*first1>*first2)
+				else if(lhsBegin!=lhsEnd && rhsBegin==rhsEnd)
 					return +1;
-				first1++;
-				first2++;
+				else //lhsBegin==lhsEnd && rhsBegin==rhsEnd
+					return 0;		
 			}
-			return 0;
-		}
+			int non_fractional(Iterator lhsBegin,Iterator lhsEnd, Iterator rhsBegin,Iterator rhsEnd)
+			{
+				//Skip Inital Zero's
+				while(lhsBegin<lhsEnd && *lhsBegin=='0') lhsBegin++;
+				while(rhsBegin<rhsEnd && *rhsBegin=='0') rhsBegin++; 
+		
+				//Comparing By Length of Both String
+				if(lhsEnd-lhsBegin<rhsEnd-rhsBegin)
+					return -1;
+				if(lhsEnd-lhsBegin>rhsEnd-rhsBegin)
+					return +1;
+
+				//Equal In length
+				while(lhsBegin<lhsEnd)
+				{
+					int local_compare = comp_over_iterator<ValueType, Iterator>()(lhsBegin,rhsBegin);
+					if(local_compare!=0)
+						return local_compare;
+					lhsBegin++;
+					rhsBegin++;
+				}
+				return 0;
+			}
 
 
-	public:
-		int operator()(\
-			Iterator first1,Iterator end1,bool isFractionalPart1,\
-			Iterator first2,Iterator end2,bool isFractionalPart2)
-		{
-			if(isFractionalPart1 && !isFractionalPart2)
-				return true;	//0<num1<1 && num2>=1
-			if(!isFractionalPart1 && isFractionalPart2)
-				return false;	//0<num2<1 && num1>=1
+		public:
+			int operator()(\
+				Iterator lhsBegin,Iterator lhsEnd,bool isFractionalPart1,\
+				Iterator rhsBegin,Iterator rhsEnd,bool isFractionalPart2)
+			{
+				if(isFractionalPart1 && !isFractionalPart2)
+					return true;	//0<num1<1 && num2>=1
+				if(!isFractionalPart1 && isFractionalPart2)
+					return false;	//0<num2<1 && num1>=1
 
-			//isFractionPart1 == isFactionalPart2
-			if(isFractionalPart1)
-				return fractional(first1,end1,first2,end2);
-			else
-				return non_fractional(first1,end1,first2,end2);
-		}
-	};
-	
+				//isFractionPart1 == isFactionalPart2
+				if(isFractionalPart1)
+					return fractional(lhsBegin,lhsEnd,rhsBegin,rhsEnd);
+				else
+					return non_fractional(lhsBegin,lhsEnd,rhsBegin,rhsEnd);
+			}
+		};
+		
 
-	template<typename T>
-	bool is_not_digit(const T &x)
-	{
-		return !isdigit(x);
-	}
+		
+
+
+	}// namespace detail
 
 	/***********************************************************************
 	Natural Comparision of Two String using both's (Begin and End Iterator)
@@ -142,16 +164,18 @@ namespace SI
 	Suffix 2 represents for components of 2nd String
 	************************************************************************/
 
-	template<typename ValueType, typename Iterator>
-	bool _natural_comp(Iterator first1,Iterator end1,Iterator first2,Iterator end2)
+	template<typename ElementType, typename Iterator>
+	bool _compare(\
+		const Iterator &lhsBegin,const Iterator &lhsEnd,\
+		const Iterator &rhsBegin,const Iterator &rhsEnd)
 	{
-		Iterator current1 = first1,current2 = first2;
+		Iterator current1 = lhsBegin,current2 = rhsBegin;
 
 		//Flag for Space Found Check
 		bool flag_found_space1 = false,flag_found_space2 = false;
 
 
-		while(current1!=end1 && current2!=end2)
+		while(current1!=lhsEnd && current2!=rhsEnd)
 		{
 			//Ignore More than One Continous Space
 
@@ -161,11 +185,11 @@ namespace SI
 				Hello  10
 				Hello 123
 			******************************************/
-			while(flag_found_space1 && current1!=end1 && *current1==' ') current1++;
+			while(flag_found_space1 && current1!=lhsEnd && *current1==' ') current1++;
 			flag_found_space1=false;
 			if(*current1==' ') flag_found_space1 = true;
 			
-			while(flag_found_space2 && current2!=end2 && *current2==' ') current2++;
+			while(flag_found_space2 && current2!=rhsEnd && *current2==' ') current2++;
 			flag_found_space2=false;
 			if(*current2==' ') flag_found_space2 = true;
 			
@@ -173,9 +197,9 @@ namespace SI
 			if( !isdigit(*current1 ) && !isdigit(*current2))
 			{
 				//If Both Are Non Digits do Normal Comparision
-				if(natural_comp_element(*current1,*current2))
+				if(detail::natural_less<ElementType>(*current1,*current2))
 					return true;
-				if(natural_comp_element(*current2,*current1))
+				if(detail::natural_less<ElementType>(*current2,*current1))
 					return false;
 				current1++;
 				current2++;
@@ -187,12 +211,12 @@ namespace SI
 				and then using it to compare Both
 
 				***********************************/
-				Iterator last_nondigit1 = 	std::find_if(current1,end1,is_not_digit<ValueType>);
-				Iterator last_nondigit2 = 	std::find_if(current2,end2,is_not_digit<ValueType>);
+				Iterator last_nondigit1 = 	std::find_if(current1,lhsEnd,detail::is_not_digit<ElementType>);
+				Iterator last_nondigit2 = 	std::find_if(current2,rhsEnd,detail::is_not_digit<ElementType>);
 				
-				int result = natural_comp_number<Iterator>()(\
-					current1,last_nondigit1,(current1>first1 && *(current1-1)=='.'), \
-					current2,last_nondigit2,(current2>first2 && *(current2-1)=='.'));
+				int result = detail::compare_number<ElementType, Iterator>()(\
+					current1,last_nondigit1,(current1>lhsBegin && *(current1-1)=='.'), \
+					current2,last_nondigit2,(current2>rhsBegin && *(current2-1)=='.'));
 				if(result<0)
 					return true;
 				if(result>0)
@@ -205,51 +229,46 @@ namespace SI
 	}
 
 	template<typename String>
-	inline bool natural_comp(const String &first ,const String &second)
+	inline bool compare(const String &first ,const String &second)
 	{
-		return _natural_comp<typename String::value_type>(first.begin(),first.end(),second.begin(),second.end());
+		return _compare<typename String::value_type,typename String::const_iterator>(first.begin(),first.end(),second.begin(),second.end());
 	}
 	template<>
-	inline bool natural_comp(char *const &first ,char *const &second)
+	inline bool compare(char *const &first ,char *const &second)
 	{
 		char* it1 = first;
 		while(*it1!='\0')it1++;
 		char* it2 = second;
 		while(*it2!='\0')it2++;
-		return _natural_comp<char>(first,it1,second,it2);
+		return _compare<char,char*>(first,it1,second,it2);
 	}
 
 
 	template<typename Container>
-	inline bool natural_sort(Container &container)
+	inline bool sort(Container &container)
 	{
-		std::sort(container.begin(),container.end(),natural_comp<typename Container::value_type>);
+		std::sort(container.begin(),container.end(),compare<typename Container::value_type>);
 	}
 
 	template<typename Iterator>
-	inline bool natural_sort(Iterator first,Iterator end)
+	inline bool sort(const Iterator &first,const Iterator &end)
 	{
-		std::sort(first,end,natural_comp<typename Iterator::value_type>);
+		std::sort(first,end,compare<typename Iterator::value_type>);
 	}
 	
 	template<typename ValueType>
-	inline bool natural_sort(ValueType* first,ValueType* end)
+	inline bool sort(ValueType* const first,ValueType* const end)
 	{
-		std::sort(first,end,natural_comp<ValueType>);
-	}
-	
-	template<typename ValueType,int N>
-	inline bool natural_sort(const ValueType *container)
-	{
-		std::sort(&container[0],&container[0]+N,natural_comp<ValueType>);
+		std::sort(first,end,compare<ValueType>);
 	}
 
 	template<typename ValueType,int N>
-	inline bool natural_sort(ValueType container[N])
+	inline bool sort(ValueType container[N])
 	{
-		std::sort(&container[0],&container[0]+N,natural_comp<ValueType>);
+		std::sort(&container[0],&container[0]+N,compare<ValueType>);
 	}
 	
-}
+}//namespace natural
+}//namespace SI
 
 #endif
