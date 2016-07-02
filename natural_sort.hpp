@@ -1,8 +1,9 @@
-/*************************************************
-	By Gagan Kumar(scopeInfinity)
-		gagan1kumar@ymail.com
+/*
+	The MIT License (MIT)
+	Copyright (c) 2016 Gagan Kumar(scopeInfinity)
+	Complete License at https://raw.githubusercontent.com/scopeInfinity/NaturalSort/master/LICENSE.md
+*/
 
-*************************************************/
 /**********************************************************************
 Calling Methods :
 
