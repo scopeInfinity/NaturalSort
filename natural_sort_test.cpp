@@ -12,6 +12,7 @@ int main()
 	std::cout<<"Comparision of \"Hello 32\" and \"Hello 32a\" : "<<(SI::natural::compare<std::string>("Hello 32","Hello 32a"))<<" (Expected: 1)"<<std::endl;
 	std::cout<<"Comparision of \"Hello 32.1\" and \"Hello 32\" : "<<(SI::natural::compare<std::string>("Hello 32.1","Hello 32"))<<" (Expected: 0)"<<std::endl;
 	std::cout<<"Comparision of \"Hello 32\" and \"Hello 32.1\" : "<<(SI::natural::compare<std::string>("Hello 32","Hello 32.1"))<<" (Expected: 1)"<<std::endl;
+	std::cout<<"Comparision of \"Hello 32\" and \"Hello 32\" : "<<(SI::natural::compare<std::string>("Hello 32","Hello 32"))<<" (Expected: 0)"<<std::endl;
 	while(getline(std::cin,s))
 		v.push_back(s);
 	std::vector<char *> v2;
