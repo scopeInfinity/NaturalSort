@@ -227,7 +227,7 @@ namespace natural
 				current2 = last_nondigit2;
 			}
 		}
-
+		return current1 == lhsEnd;
 	}
 
 	template<typename String>
