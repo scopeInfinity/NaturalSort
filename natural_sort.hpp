@@ -60,6 +60,7 @@ namespace natural
 					return -1;
 				if(natural_less<ElementType>(*rhs,*lhs))
 					return +1;
+				return 0;
 			}
 		};
 	
