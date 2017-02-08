@@ -247,25 +247,25 @@ namespace natural
 
 
 	template<typename Container>
-	inline bool sort(Container &container)
+	inline void sort(Container &container)
 	{
 		std::sort(container.begin(),container.end(),compare<typename Container::value_type>);
 	}
 
 	template<typename Iterator>
-	inline bool sort(const Iterator &first,const Iterator &end)
+	inline void sort(const Iterator &first,const Iterator &end)
 	{
 		std::sort(first,end,compare<typename Iterator::value_type>);
 	}
 	
 	template<typename ValueType>
-	inline bool sort(ValueType* const first,ValueType* const end)
+	inline void sort(ValueType* const first,ValueType* const end)
 	{
 		std::sort(first,end,compare<ValueType>);
 	}
 
 	template<typename ValueType,int N>
-	inline bool sort(ValueType container[N])
+	inline void sort(ValueType container[N])
 	{
 		std::sort(&container[0],&container[0]+N,compare<ValueType>);
 	}
