@@ -1,5 +1,5 @@
 # NaturalSort
-C++ Header File for Natural Comparision and Natural Sort
+C++ Header File for Natural Comparison and Natural Sort
 
 
 ##### Calling Methods 
