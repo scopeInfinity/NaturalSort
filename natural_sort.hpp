@@ -74,9 +74,9 @@ namespace natural
 			);
 
 		Returns : 
-			-1  - Number1  <   Number2
+			<0  - Number1  <   Number2
 			 0  - Number1  ==  Number2
-			 1  - Number1  >   Number2
+			>0  - Number1  >   Number2
 
 		***************************************************/
 
@@ -85,6 +85,17 @@ namespace natural
 		struct compare_number
 		{
 		private:
+			int skipLeading0s(Iterator& begin, Iterator end)
+			{
+				int skippedLeading0s = 0;
+				while(begin<end && *begin=='0')
+				{
+					skippedLeading0s++;
+					begin++;
+				}
+				return skippedLeading0s;
+			}
+
 			//If Number is Itself fractional Part
 			int fractional(Iterator lhsBegin,Iterator lhsEnd, Iterator rhsBegin,Iterator rhsEnd)
 			{
@@ -96,20 +107,24 @@ namespace natural
 					lhsBegin++;
 					rhsBegin++;
 				}
-				while(lhsBegin<lhsEnd && *lhsBegin=='0') lhsBegin++;
-				while(rhsBegin<rhsEnd && *rhsBegin=='0') rhsBegin++;
+				const int lhsLeading0s = skipLeading0s(lhsBegin, lhsEnd);
+				const int rhsLeading0s = skipLeading0s(rhsBegin, rhsEnd);
 				if(lhsBegin==lhsEnd && rhsBegin!=rhsEnd)
 					return -1;
 				else if(lhsBegin!=lhsEnd && rhsBegin==rhsEnd)
 					return +1;
 				else //lhsBegin==lhsEnd && rhsBegin==rhsEnd
-					return 0;		
+#ifndef SI_sort_leading_0s
+					return 0;
+#else
+					return lhsLeading0s - rhsLeading0s;		// '.700' comes after '.7'
+#endif
 			}
 			int non_fractional(Iterator lhsBegin,Iterator lhsEnd, Iterator rhsBegin,Iterator rhsEnd)
 			{
 				//Skip Inital Zero's
-				while(lhsBegin<lhsEnd && *lhsBegin=='0') lhsBegin++;
-				while(rhsBegin<rhsEnd && *rhsBegin=='0') rhsBegin++; 
+				const int lhsLeading0s = skipLeading0s(lhsBegin, lhsEnd);
+				const int rhsLeading0s = skipLeading0s(rhsBegin, rhsEnd);
 		
 				//Comparing By Length of Both String
 				if(lhsEnd-lhsBegin<rhsEnd-rhsBegin)
@@ -126,7 +141,11 @@ namespace natural
 					lhsBegin++;
 					rhsBegin++;
 				}
+#ifndef SI_sort_leading_0s
 				return 0;
+#else
+				return rhsLeading0s - lhsLeading0s;			// '007' comes before plain old '7'
+#endif
 			}
 
 
@@ -157,10 +176,7 @@ namespace natural
 	/***********************************************************************
 	Natural Comparision of Two String using both's (Begin and End Iterator)
 
-	Returns : 
-		-1  - String1  <   String2
-		 0  - String1  ==  String2
-		 1  - String1  >   String2
+	Returns : true if  String1  <   String2
 
 	Suffix 1 represents for components of 1st String
 	Suffix 2 represents for components of 2nd String

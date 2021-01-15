@@ -13,6 +13,11 @@ int main()
 	std::cout<<"Comparision of \"Hello 32.1\" and \"Hello 32\" : "<<(SI::natural::compare<std::string>("Hello 32.1","Hello 32"))<<" (Expected: 0)"<<std::endl;
 	std::cout<<"Comparision of \"Hello 32\" and \"Hello 32.1\" : "<<(SI::natural::compare<std::string>("Hello 32","Hello 32.1"))<<" (Expected: 1)"<<std::endl;
 	std::cout<<"Comparision of \"Hello 32\" and \"Hello 32\" : "<<(SI::natural::compare<std::string>("Hello 32","Hello 32"))<<" (Expected: 0)"<<std::endl;
+#ifdef SI_sort_leading_0s
+	std::cout<<"Comparision of \"Hello 032\" and \"Hello 32\" : "<<(SI::natural::compare<std::string>("Hello 032","Hello 32"))<<" (Expected: 1)"<<std::endl;
+	std::cout<<"Comparision of \"Hello 0032\" and \"Hello 33\" : "<<(SI::natural::compare<std::string>("Hello 0032","Hello 33"))<<" (Expected: 1)"<<std::endl;
+	std::cout<<"Comparision of \"Hello 32.1\" and \"Hello 32.100\" : "<<(SI::natural::compare<std::string>("Hello 32.1","Hello 32.100"))<<" (Expected: 1)"<<std::endl;
+#endif
 	while(getline(std::cin,s))
 		v.push_back(s);
 	std::vector<char *> v2;
