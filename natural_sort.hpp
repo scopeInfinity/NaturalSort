@@ -107,6 +107,7 @@ namespace natural
 			}
 			int non_fractional(Iterator lhsBegin,Iterator lhsEnd, Iterator rhsBegin,Iterator rhsEnd)
 			{
+#ifndef SI_sort_leading_0s
 				//Skip Inital Zero's
 				while(lhsBegin<lhsEnd && *lhsBegin=='0') lhsBegin++;
 				while(rhsBegin<rhsEnd && *rhsBegin=='0') rhsBegin++; 
@@ -116,6 +117,7 @@ namespace natural
 					return -1;
 				if(lhsEnd-lhsBegin>rhsEnd-rhsBegin)
 					return +1;
+#endif
 
 				//Equal In length
 				while(lhsBegin<lhsEnd)
