@@ -12,9 +12,13 @@ Calling Methods :
 	void SI::natural::sort(IteratorBegin<String>,IteratorEnd<String>);
 	void SI::natural::sort<String,CArraySize>(CArray<String>);
 
-	//For Natural Comparision
+	//For Natural Comparison less-than
 	bool SI::natural::compare<String>(String lhs,String rhs);
 	bool SI::natural::compare<String>(char *const lhs,char *const rhs);
+
+	//For Natural Comparison less-than, equal-to, or greater-than (3-way)
+	int SI::natural::compare3<String>(String lhs,String rhs);
+	int SI::natural::compare3<String>(char *const lhs,char *const rhs);
 
 	Here we can have
 		std::vector<std::string> 	as Container<String>
@@ -158,16 +162,14 @@ namespace natural
 	Natural Comparision of Two String using both's (Begin and End Iterator)
 
 	Returns : 
-		-1  - String1  <   String2
+		<0  - String1  <   String2
 		 0  - String1  ==  String2
-		 1  - String1  >   String2
+		>0  - String1  >   String2
 
-	Suffix 1 represents for components of 1st String
-	Suffix 2 represents for components of 2nd String
 	************************************************************************/
 
 	template<typename ElementType, typename Iterator>
-	bool _compare(\
+	int compare3(\
 		const Iterator &lhsBegin,const Iterator &lhsEnd,\
 		const Iterator &rhsBegin,const Iterator &rhsEnd)
 	{
@@ -200,9 +202,9 @@ namespace natural
 			{
 				// Normal comparision if any of character is non digit character
 				if(detail::natural_less<ElementType>(*current1,*current2))
-					return true;
+					return -1;
 				if(detail::natural_less<ElementType>(*current2,*current1))
-					return false;
+					return 1;
 				current1++;
 				current2++;
 			}
@@ -219,35 +221,45 @@ namespace natural
 				int result = detail::compare_number<ElementType, Iterator>()(\
 					current1,last_nondigit1,(current1>lhsBegin && *(current1-1)=='.'), \
 					current2,last_nondigit2,(current2>rhsBegin && *(current2-1)=='.'));
-				if(result<0)
-					return true;
-				if(result>0)
-					return false;
+				if(result != 0)
+					return result;
 				current1 = last_nondigit1;
 				current2 = last_nondigit2;
 			}
 		}
 
 		if (current1 == lhsEnd && current2 == rhsEnd) {
-			return false;
+			return 0;
 		} else {
-			return current1 == lhsEnd;
+			return current1 == lhsEnd ? -1 : 1;
 		}
 	}
 
 	template<typename String>
-	inline bool compare(const String &first ,const String &second)
+	inline int compare3(const String &first ,const String &second)
 	{
-		return _compare<typename String::value_type,typename String::const_iterator>(first.begin(),first.end(),second.begin(),second.end());
+		return compare3<typename String::value_type,typename String::const_iterator>(first.begin(),first.end(),second.begin(),second.end());
 	}
+
 	template<>
-	inline bool compare(char *const &first ,char *const &second)
+	inline int compare3(char *const &first ,char *const &second)
 	{
 		char* it1 = first;
 		while(*it1!='\0')it1++;
 		char* it2 = second;
 		while(*it2!='\0')it2++;
-		return _compare<char,char*>(first,it1,second,it2);
+		return compare3<char,char*>(first,it1,second,it2);
+	}
+
+	template<typename String>
+	inline bool compare(const String &first ,const String &second)
+	{
+		return compare3<typename String::value_type,typename String::const_iterator>(first.begin(),first.end(),second.begin(),second.end()) < 0;
+	}
+	template<>
+	inline bool compare(char *const &first ,char *const &second)
+	{
+		return compare3(first, second) < 0;
 	}
 
 
