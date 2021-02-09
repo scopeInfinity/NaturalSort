@@ -1,4 +1,4 @@
-# NaturalSort
+# NaturalSort ![CI](https://github.com/scopeInfinity/NaturalSort/workflows/CI/badge.svg)
 C++ Header File for Natural Comparison and Natural Sort
 
 
