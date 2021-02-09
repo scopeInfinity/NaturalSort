@@ -1,0 +1,14 @@
+name: CMake
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Test
+      shell: bash
+      run: make test
